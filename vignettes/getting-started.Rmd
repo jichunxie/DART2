@@ -1,0 +1,69 @@
+---
+title: "getting-started"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{getting-started}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The `DART2` package accompanies the paper "DART2: a robust multiple testing method to smartly leverage helpful or misleading ancillary information". It is a new multiple-testing method to leverage ancillary information for improving testing performance, regardless of whether the ancillary information is helpful or misleading.
+
+This document provides a simple example about how to use the functions in DART2 package. Please refer to the paper for the in-depth information (e.g. data preprocess, hypotheses set up, tuning parameter selection, etc.) about the data analysis. 
+
+```{r setup}
+library(DART2)
+```
+
+
+
+Here, we show how to apply `DART2` based on the existing aggregation tree.
+\par
+The sample data we used contains 1000 hypothesis, each hypothesis links to a test statistics that suppose to follow standard normal distibution under null (`Sample_list$stat`). The 5-layer aggregation tree (`Sample_list$ATree`) is presented in the form of list, and `Sample_list$Atree[[X]]` stands for the node combination on layer $X+1$.
+
+Each `Sample_list$Atree[[X]]` is structured as a matrix, with columns representing nodes at layer $X$
+X and rows representing nodes at layer $X+1$
+after combination. In this matrix, a value of $1$ indicates that the corresponding node at layer 
+$X$ is included in the combination forming the node at layer $X+1$, while a $0$ indicates it is not.
+
+For example, consider a $2\times 4$ matrix 
+\begin{bmatrix}
+1 & 1 & 0 & 0\\
+0 & 0 & 1 & 1
+\end{bmatrix}
+Then this matrix means the layer $X$ contains $4$ nodes and the outcoming layer $X+1$ has $2$ nodes. the first node on layer $X+1$ is formed by combining the first two nodes on layer $X$, and the second node on layer $X+1$ is formed by combining the 3rd and 4th nodes on layer $X$.
+
+
+
+
+```{r}
+#Sample_list is a build-in data in DART2 package. It is a list contains 2 elements: 1)ATree: aggregation tree, 2)stat: contains the test statistics
+
+# run DART2_list
+test_result <- DART2_list(Llist=Sample_list$ATree,T1=Sample_list$stat)
+
+head(test_result)
+```
+
+
+Given in a lot of applications, the hypothesis is simply orderes, DART2 package also introduces the function DART2_order for situations where hypotheses are pre-ordered. Unlike other functions, DART2_order does not require the input of an aggregation tree. Instead, it automatically constructs the aggregation tree based on the provided order of hypotheses, streamlining the process.
+
+The sample data we used also contains 1000 hypothesis. The data is presented in the form of data frame. The data frame contains 4 variables 1) "hypo": index of hypothesis; 2) "pval": p-values for each hypothesis; 3)"z": test statistics for each hypothesis; 4) "orderp": the order of hypothesis based on external information.
+
+```{r}
+#Sample_order is a build-in data.frame in DART2 package.
+
+# run DART2_order
+test_result <- DART2_order(Sample_order)
+
+head(test_result)
+```
+
+
